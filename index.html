@@ -1,24 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutGrid, 
   Users, 
   Database, 
   Search, 
   Calendar, 
-  FileText, 
-  HelpCircle,
-  ChevronDown,
-  RefreshCw,
-  LogOut,
-  Sparkles,
-  DownloadCloud,
-  Filter,
-  MapPin,
-  Trophy,
+  ChevronDown, 
+  RefreshCw, 
+  LogOut, 
+  DownloadCloud, 
+  Filter, 
+  MapPin, 
+  Trophy, 
   Ticket
 } from 'lucide-react';
 
-// --- New Mock Data based on Uploaded CSV ---
+// --- 1. MOCK DATA (Defined First) ---
 const MOCK_DATA = [
   { 
     id: 1, 
@@ -89,7 +86,7 @@ const DICTIONARY_DATA = [
   { field: 'Segment', desc: 'กลุ่มลูกค้า (High Luck = ถูก > 15 งวด)', source: 'Analytics Model' },
 ];
 
-// --- Helper Component (Moved up to prevent ReferenceError) ---
+// --- 2. HELPER COMPONENTS (Defined Before Usage) ---
 const SidebarItem = ({ icon, label, active = false, onClick }) => (
   <button 
     onClick={onClick}
@@ -106,6 +103,7 @@ const SidebarItem = ({ icon, label, active = false, onClick }) => (
   </button>
 );
 
+// --- 3. MAIN APP COMPONENT ---
 const App = () => {
   const [activeTab, setActiveTab] = useState('report'); 
   const [isLoading, setIsLoading] = useState(false);
@@ -115,10 +113,10 @@ const App = () => {
   // Filter States
   const [province, setProvince] = useState('all');
   const [gender, setGender] = useState('all');
-  const [roundDate, setRoundDate] = useState('all'); // New State
+  const [roundDate, setRoundDate] = useState('all'); 
 
-  // Extract unique round dates for dropdown
-  const uniqueRounds = [...new Set(MOCK_DATA.map(item => item.round_date))].sort();
+  // Extract unique round dates safely
+  const uniqueRounds = Array.from(new Set(MOCK_DATA.map(item => item.round_date))).sort();
 
   const handleSearch = () => {
     setIsLoading(true);
@@ -161,7 +159,7 @@ const App = () => {
             </div>
             <div>
               <h1 className="font-bold text-xl tracking-tight text-slate-900">LuckyCRM</h1>
-              <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Customer Portal</p>
+              <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Customer Portal v2.0</p>
             </div>
           </div>
           
@@ -238,7 +236,7 @@ const App = () => {
           {activeTab === 'report' && (
             <div className="space-y-8">
               
-              {/* Filter Bar - UPDATED LAYOUT */}
+              {/* Filter Bar */}
               <div className="bg-white rounded-3xl p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col lg:flex-row">
                  
                  {/* Province Segment */}
@@ -281,7 +279,7 @@ const App = () => {
                     </div>
                  </div>
 
-                 {/* NEW: Round Date Segment */}
+                 {/* Round Date Segment */}
                  <div className="flex-1 p-5 border-b lg:border-b-0 lg:border-r border-slate-100">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block flex items-center gap-2">
                        <Calendar size={14} /> Round Date
@@ -368,7 +366,7 @@ const App = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.map((row, idx) => (
+                        {data.map((row) => (
                           <tr key={row.id} className="group hover:bg-slate-50/80 transition-all duration-200">
                             <td className="px-6 py-5 pl-8">
                               <div className="font-bold text-slate-700">{row.customer}</div>
@@ -400,7 +398,7 @@ const App = () => {
                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-full">
                                   <Trophy size={14} className="text-yellow-600" />
                                   <span className="font-bold text-yellow-700">{row.total_wins} / 25</span>
-                               </div>
+                                </div>
                             </td>
                           </tr>
                         ))}
