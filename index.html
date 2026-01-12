@@ -1,0 +1,440 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  LayoutGrid, 
+  Users, 
+  Database, 
+  Search, 
+  Calendar, 
+  FileText, 
+  HelpCircle,
+  ChevronDown,
+  RefreshCw,
+  LogOut,
+  Sparkles,
+  DownloadCloud,
+  Filter,
+  MapPin,
+  Trophy,
+  Ticket
+} from 'lucide-react';
+
+// --- New Mock Data based on Uploaded CSV ---
+const MOCK_DATA = [
+  { 
+    id: 1, 
+    customer: 'คมสาร ด่านสมบัติสกุล', 
+    province: 'สมุทรปราการ', 
+    gender: 'MALE', 
+    age: 54, 
+    round_date: '2025-01-17', 
+    tickets_bought: 38, 
+    total_wins: 16, 
+    segment: 'High Luck',
+    last_prize: 'เลขท้าย 2 ตัว'
+  },
+  { 
+    id: 2, 
+    customer: 'สมหญิง รักดี', 
+    province: 'กรุงเทพมหานคร', 
+    gender: 'FEMALE', 
+    age: 45, 
+    round_date: '2025-01-17', 
+    tickets_bought: 25, 
+    total_wins: 18, 
+    segment: 'High Luck',
+    last_prize: 'เลขท้าย 3 ตัว'
+  },
+  { 
+    id: 3, 
+    customer: 'วิชัย ใจมั่น', 
+    province: 'เชียงใหม่', 
+    gender: 'MALE', 
+    age: 62, 
+    round_date: '2025-02-01', 
+    tickets_bought: 90, 
+    total_wins: 20, 
+    segment: 'VIP',
+    last_prize: 'รางวัลที่ 5'
+  },
+  { 
+    id: 4, 
+    customer: 'นภา ฟ้าสว่าง', 
+    province: 'ขอนแก่น', 
+    gender: 'FEMALE', 
+    age: 38, 
+    round_date: '2025-02-01', 
+    tickets_bought: 12, 
+    total_wins: 15, 
+    segment: 'Lucky Star',
+    last_prize: 'เลขหน้า 3 ตัว'
+  },
+  { 
+    id: 5, 
+    customer: 'คุณคมสาร ด่านสมบัติสกุล', 
+    province: 'สมุทรปราการ', 
+    gender: 'MALE', 
+    age: 54, 
+    round_date: '2025-02-01', 
+    tickets_bought: 38, 
+    total_wins: 16, 
+    segment: 'High Luck',
+    last_prize: '-'
+  },
+];
+
+const DICTIONARY_DATA = [
+  { field: 'roundDateod', desc: 'วันทีงวดสลาก (Lottery Round Date)', source: 'Transaction' },
+  { field: 'countprizeround', desc: 'จำนวนงวดที่ถูกรางวัลสะสม (Winning Frequency)', source: 'Aggregated Data' },
+  { field: 'all_lt_count', desc: 'จำนวนสลากทั้งหมดที่ซื้อในงวดนั้น', source: 'Transaction' },
+  { field: 'Segment', desc: 'กลุ่มลูกค้า (High Luck = ถูก > 15 งวด)', source: 'Analytics Model' },
+];
+
+const App = () => {
+  const [activeTab, setActiveTab] = useState('report'); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [data, setData] = useState([]);
+  const [notification, setNotification] = useState(null);
+  
+  // Filter States
+  const [province, setProvince] = useState('all');
+  const [gender, setGender] = useState('all');
+  const [roundDate, setRoundDate] = useState('all'); // New State
+
+  // Extract unique round dates for dropdown
+  const uniqueRounds = [...new Set(MOCK_DATA.map(item => item.round_date))].sort();
+
+  const handleSearch = () => {
+    setIsLoading(true);
+    setData([]); 
+    
+    setTimeout(() => {
+      let filtered = [...MOCK_DATA];
+      
+      if (province !== 'all') {
+        filtered = filtered.filter(item => item.province === province);
+      }
+      if (gender !== 'all') {
+        filtered = filtered.filter(item => item.gender === gender);
+      }
+      if (roundDate !== 'all') {
+        filtered = filtered.filter(item => item.round_date === roundDate);
+      }
+      
+      setData(filtered);
+      setIsLoading(false);
+    }, 800);
+  };
+
+  const handleExport = () => {
+    setNotification('Exporting Customer Data...');
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const fmtNumber = (num) => new Intl.NumberFormat('th-TH').format(num);
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 font-sans flex flex-col md:flex-row selection:bg-emerald-100 selection:text-emerald-700">
+      
+      {/* --- Sidebar --- */}
+      <aside className="w-full md:w-72 bg-white flex-shrink-0 flex flex-col h-screen sticky top-0 border-r border-slate-100 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-20">
+        <div className="p-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-200">
+              <Trophy size={20} fill="currentColor" className="text-white/90" />
+            </div>
+            <div>
+              <h1 className="font-bold text-xl tracking-tight text-slate-900">LuckyCRM</h1>
+              <p className="text-[10px] font-semibold text-emerald-600 uppercase tracking-widest">Customer Portal</p>
+            </div>
+          </div>
+          
+          <div className="space-y-1">
+            <SidebarItem 
+              icon={<LayoutGrid size={20} />} 
+              label="Dashboard" 
+            />
+            <SidebarItem 
+              icon={<Users size={20} />} 
+              label="Customer List" 
+              active={activeTab === 'report'} 
+              onClick={() => setActiveTab('report')}
+            />
+            <SidebarItem 
+              icon={<Database size={20} />} 
+              label="Data Schema" 
+              active={activeTab === 'dictionary'}
+              onClick={() => setActiveTab('dictionary')}
+            />
+          </div>
+        </div>
+
+        <div className="mt-auto p-6 border-t border-slate-50 mx-4 mb-4">
+           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 font-bold text-sm border-2 border-white shadow-sm">
+                  DS
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-slate-800 truncate">Data Science</p>
+                  <p className="text-xs text-slate-500 truncate">Admin Access</p>
+                </div>
+                <button className="text-slate-400 hover:text-red-500 transition-colors">
+                  <LogOut size={18} />
+                </button>
+              </div>
+           </div>
+        </div>
+      </aside>
+
+      {/* --- Main Content --- */}
+      <main className="flex-1 overflow-y-auto relative">
+        <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-b from-emerald-50/50 to-transparent -z-10" />
+
+        <div className="max-w-7xl mx-auto p-6 md:p-10">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
+                {activeTab === 'report' ? 'Lucky Customer Insights' : 'Data Schema'}
+              </h2>
+              <p className="text-slate-500 mt-2 text-lg font-light">
+                {activeTab === 'report' 
+                  ? 'List of customers with high winning frequency (>15 rounds).' 
+                  : 'Definition of customer attributes.'}
+              </p>
+            </div>
+          </div>
+
+          {/* Toast Notification */}
+          {notification && (
+            <div className="fixed bottom-8 right-8 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 animate-in slide-in-from-bottom-5">
+              <RefreshCw className="animate-spin text-emerald-400" size={24} />
+              <div>
+                <p className="font-medium">Processing</p>
+                <p className="text-xs text-slate-400">{notification}</p>
+              </div>
+            </div>
+          )}
+
+          {/* --- REPORT VIEW --- */}
+          {activeTab === 'report' && (
+            <div className="space-y-8">
+              
+              {/* Filter Bar - UPDATED LAYOUT */}
+              <div className="bg-white rounded-3xl p-1 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col lg:flex-row">
+                 
+                 {/* Province Segment */}
+                 <div className="flex-1 p-5 border-b lg:border-b-0 lg:border-r border-slate-100">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block flex items-center gap-2">
+                      <MapPin size={14} /> Province
+                    </label>
+                    <div className="relative group">
+                       <select 
+                        className="w-full bg-slate-50 border-none rounded-xl py-2.5 pl-4 pr-10 text-slate-700 font-medium focus:ring-2 focus:ring-emerald-500/20 cursor-pointer appearance-none group-hover:bg-slate-100 transition-colors"
+                        value={province}
+                        onChange={(e) => setProvince(e.target.value)}
+                      >
+                        <option value="all">All Provinces</option>
+                        <option value="สมุทรปราการ">สมุทรปราการ</option>
+                        <option value="กรุงเทพมหานคร">กรุงเทพมหานคร</option>
+                        <option value="เชียงใหม่">เชียงใหม่</option>
+                        <option value="ขอนแก่น">ขอนแก่น</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                    </div>
+                 </div>
+
+                 {/* Gender Segment */}
+                 <div className="flex-1 p-5 border-b lg:border-b-0 lg:border-r border-slate-100">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block flex items-center gap-2">
+                       <Users size={14} /> Gender
+                    </label>
+                    <div className="relative group">
+                       <select 
+                        className="w-full bg-slate-50 border-none rounded-xl py-2.5 pl-4 pr-10 text-slate-700 font-medium focus:ring-2 focus:ring-emerald-500/20 cursor-pointer appearance-none group-hover:bg-slate-100 transition-colors"
+                        value={gender}
+                        onChange={(e) => setGender(e.target.value)}
+                      >
+                        <option value="all">All Genders</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                    </div>
+                 </div>
+
+                 {/* NEW: Round Date Segment */}
+                 <div className="flex-1 p-5 border-b lg:border-b-0 lg:border-r border-slate-100">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 block flex items-center gap-2">
+                       <Calendar size={14} /> Round Date
+                    </label>
+                    <div className="relative group">
+                       <select 
+                        className="w-full bg-slate-50 border-none rounded-xl py-2.5 pl-4 pr-10 text-slate-700 font-medium focus:ring-2 focus:ring-emerald-500/20 cursor-pointer appearance-none group-hover:bg-slate-100 transition-colors"
+                        value={roundDate}
+                        onChange={(e) => setRoundDate(e.target.value)}
+                      >
+                        <option value="all">All Rounds</option>
+                        {uniqueRounds.map(date => (
+                          <option key={date} value={date}>{date}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={18} />
+                    </div>
+                 </div>
+
+                 {/* Action Segment */}
+                 <div className="p-5 flex items-center justify-end">
+                    <button 
+                      onClick={handleSearch}
+                      className="w-full lg:w-auto flex items-center justify-center gap-2 px-8 py-3 bg-slate-900 text-white rounded-xl font-semibold hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/30 active:scale-95 transition-all duration-300"
+                    >
+                      {isLoading ? <RefreshCw className="animate-spin" size={18} /> : <Search size={18} />}
+                      <span>Find Users</span>
+                    </button>
+                 </div>
+              </div>
+
+              {/* Data Display */}
+              <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col min-h-[500px]">
+                {/* Header */}
+                <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-white sticky top-0 z-10">
+                   <div className="flex items-center gap-3">
+                     <div className="w-2 h-8 bg-emerald-500 rounded-full"></div>
+                     <h3 className="text-lg font-bold text-slate-800">Target Customers</h3>
+                     <span className="bg-emerald-50 text-emerald-600 text-xs font-bold px-2 py-1 rounded-md border border-emerald-100">{data.length} Found</span>
+                   </div>
+                   
+                   <button 
+                      onClick={handleExport}
+                      disabled={data.length === 0}
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                        data.length === 0 
+                        ? 'bg-slate-50 text-slate-300 cursor-not-allowed' 
+                        : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:scale-105'
+                      }`}
+                   >
+                     <DownloadCloud size={18} />
+                     Export List
+                   </button>
+                </div>
+
+                {/* Table */}
+                <div className="flex-1 overflow-x-auto p-2">
+                  {isLoading ? (
+                    <div className="h-96 flex flex-col items-center justify-center gap-4 animate-pulse">
+                      <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center">
+                        <RefreshCw className="animate-spin text-emerald-500" size={24} />
+                      </div>
+                      <p className="text-slate-400 font-medium">Loading customer data...</p>
+                    </div>
+                  ) : data.length === 0 ? (
+                    <div className="h-96 flex flex-col items-center justify-center gap-6 text-center">
+                      <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center shadow-inner">
+                        <Filter size={40} className="text-slate-300" />
+                      </div>
+                      <div>
+                        <h4 className="text-slate-900 font-bold text-lg">No Data</h4>
+                        <p className="text-slate-400 mt-1">Select filters to view lucky customers.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead>
+                        <tr className="text-slate-400 border-b border-slate-50">
+                          <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px] pl-8">Customer Name</th>
+                          <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Province / Age</th>
+                          <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px]">Latest Round</th>
+                          <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px] text-right">Tickets (Round)</th>
+                          <th className="px-6 py-4 font-semibold uppercase tracking-wider text-[11px] text-right pr-8">Total Wins (Accum)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.map((row, idx) => (
+                          <tr key={row.id} className="group hover:bg-slate-50/80 transition-all duration-200">
+                            <td className="px-6 py-5 pl-8">
+                              <div className="font-bold text-slate-700">{row.customer}</div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`w-2 h-2 rounded-full ${
+                                  row.gender === 'MALE' ? 'bg-blue-400' : 'bg-pink-400'
+                                }`}></span>
+                                <span className="text-xs text-slate-500 font-medium">{row.gender}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-5">
+                              <div className="font-medium text-slate-600 flex flex-col">
+                                <span>{row.province}</span>
+                                <span className="text-xs text-slate-400">Age: {row.age}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-5">
+                               <div className="flex items-center gap-2 text-slate-600 font-mono bg-slate-100 w-fit px-2 py-1 rounded">
+                                 <Calendar size={12} /> {row.round_date}
+                               </div>
+                            </td>
+                            <td className="px-6 py-5 text-right">
+                               <div className="flex items-center justify-end gap-2 text-slate-700 font-bold">
+                                 <Ticket size={16} className="text-emerald-500" />
+                                 {fmtNumber(row.tickets_bought)}
+                               </div>
+                            </td>
+                            <td className="px-6 py-5 text-right pr-8">
+                               <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-50 border border-yellow-200 rounded-full">
+                                  <Trophy size={14} className="text-yellow-600" />
+                                  <span className="font-bold text-yellow-700">{row.total_wins} / 25</span>
+                               </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* --- DICTIONARY VIEW --- */}
+          {activeTab === 'dictionary' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               {DICTIONARY_DATA.map((item, idx) => (
+                 <div key={idx} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <div className="flex justify-between items-start mb-4">
+                      <h3 className="text-xl font-bold text-slate-800 font-mono">{item.field}</h3>
+                      <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-bold uppercase tracking-wide border border-emerald-100">
+                        {item.source}
+                      </span>
+                    </div>
+                    <p className="text-slate-500 leading-relaxed">
+                      {item.desc}
+                    </p>
+                 </div>
+               ))}
+            </div>
+          )}
+
+        </div>
+      </main>
+    </div>
+  );
+};
+
+// --- Helper Component ---
+const SidebarItem = ({ icon, label, active = false, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
+      active 
+        ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
+        : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'
+    }`}
+  >
+    <span className={`${active ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-500 transition-colors'}`}>
+      {icon}
+    </span>
+    <span>{label}</span>
+  </button>
+);
+
+export default App;
