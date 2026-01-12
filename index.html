@@ -89,6 +89,23 @@ const DICTIONARY_DATA = [
   { field: 'Segment', desc: 'กลุ่มลูกค้า (High Luck = ถูก > 15 งวด)', source: 'Analytics Model' },
 ];
 
+// --- Helper Component (Moved up to prevent ReferenceError) ---
+const SidebarItem = ({ icon, label, active = false, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
+      active 
+        ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
+        : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'
+    }`}
+  >
+    <span className={`${active ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-500 transition-colors'}`}>
+      {icon}
+    </span>
+    <span>{label}</span>
+  </button>
+);
+
 const App = () => {
   const [activeTab, setActiveTab] = useState('report'); 
   const [isLoading, setIsLoading] = useState(false);
@@ -419,22 +436,5 @@ const App = () => {
     </div>
   );
 };
-
-// --- Helper Component ---
-const SidebarItem = ({ icon, label, active = false, onClick }) => (
-  <button 
-    onClick={onClick}
-    className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
-      active 
-        ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' 
-        : 'text-slate-500 hover:bg-emerald-50 hover:text-emerald-600'
-    }`}
-  >
-    <span className={`${active ? 'text-emerald-400' : 'text-slate-400 group-hover:text-emerald-500 transition-colors'}`}>
-      {icon}
-    </span>
-    <span>{label}</span>
-  </button>
-);
 
 export default App;
