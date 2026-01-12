@@ -46,8 +46,6 @@
             position: fixed;
             top: 20px;
             right: 30px; /* Moved to right */
-            /* left: 50%; Removed centering */
-            /* transform: translateX(-50%); Removed centering */
             z-index: 9999;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -655,20 +653,22 @@
                 setAiModal({ open: true, data: customer, result: '', loading: true });
                 
                 const prompt = `
-                    Act as a Senior Marketing Analyst for a Lottery Platform in Thailand.
-                    Analyze this customer data:
+                    Act as a Creative Content Creator for TikTok, specializing in lottery and viral trends in Thailand.
+                    Create a viral TikTok script based on this customer's lucky profile:
                     - Name: ${customer.customer}
                     - Age: ${customer.age}
                     - Province: ${customer.province}
-                    - Gender: ${customer.gender}
                     - Winning History: Won ${customer.total_wins} times (High Frequency)
                     - Last Prize: ${customer.last_prize}
-                    - Buying Behavior: Bought ${customer.tickets_bought} tickets in latest round (${customer.round_date})
+                    - Story Angle: A lucky winner from ${customer.province} who wins frequently!
 
                     Output in Thai language (use Markdown).
-                    1. **Customer Persona**: Create a short, catchy persona title (e.g., "The Statistical Strategist").
-                    2. **Behavior Analysis**: Briefly explain their buying habit.
-                    3. **Recommended Action**: Suggest 1 specific personalized marketing campaign to increase their engagement or retention.
+                    Structure the response as:
+                    1. **🎯 Concept**: A catchy title for the clip.
+                    2. **🔥 The Hook (0-3s)**: A script line to grab attention immediately.
+                    3. **🗣️ Script Body**: A short, engaging narration or dialogue telling their story.
+                    4. **🎬 Visual Idea**: Brief camera or visual instruction.
+                    5. **✨ Viral Hashtags**: 3-5 relevant hashtags.
                 `;
 
                 try {
