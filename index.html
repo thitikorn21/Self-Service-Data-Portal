@@ -1,36 +1,516 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LuckyCRM - Customer Insights with Gemini AI</title>
+    <title>LuckyCRM: Project Blueprint & Live App</title>
     
-    <!-- 1. Import React & ReactDOM -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js (For Infographic) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- React & ReactDOM (For Live App) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- 2. Import Babel for JSX -->
+    <!-- Babel for JSX (For Live App) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- 3. Import Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- 4. Import Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- 5. Markdown Parser for AI Response -->
+
+    <!-- Markdown Parser (For AI Response) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { font-family: 'Sarabun', sans-serif; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #f8fafc;
+        }
+        .thai-font {
+            font-family: 'Sarabun', sans-serif;
+        }
         .markdown-prose p { margin-bottom: 0.5rem; }
         .markdown-prose strong { color: #059669; font-weight: 600; }
         .markdown-prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+
+        /* Infographic Specific Styles */
+        .card-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1); }
+        .chart-container { position: relative; width: 100%; max-width: 600px; height: 300px; margin: 0 auto; }
+        .arrow-down { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 15px solid #cbd5e1; margin: 10px auto; }
+        
+        /* Toggle Switcher Style - MOVED TO TOP RIGHT */
+        .view-switcher {
+            position: fixed;
+            top: 20px;
+            right: 30px; /* Moved to right */
+            /* left: 50%; Removed centering */
+            /* transform: translateX(-50%); Removed centering */
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 5px;
+            border-radius: 9999px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            gap: 5px;
+        }
+        .view-btn {
+            padding: 8px 20px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .view-btn.active {
+            background: #4f46e5;
+            color: white;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.3);
+        }
+        .view-btn.inactive {
+            background: transparent;
+            color: #64748b;
+        }
+        .view-btn.inactive:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+        
+        /* Hide scrollbar for clean app look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root"></div>
+<body class="text-slate-700">
 
+    <!-- VIEW SWITCHER (NAVIGATION) -->
+    <nav class="view-switcher">
+        <button id="btn-blueprint" class="view-btn active" onclick="switchView('blueprint')">📄 Blueprint</button>
+        <button id="btn-app" class="view-btn inactive" onclick="switchView('app')">📱 Live App</button>
+    </nav>
+
+    <!-- ================= PAGE 1: INFOGRAPHIC BLUEPRINT ================= -->
+    <div id="infographic-view">
+        <!-- 1. Header / Introduction -->
+        <header class="bg-white py-24 px-6 text-center border-b border-slate-200">
+            <div class="max-w-4xl mx-auto">
+                <div class="inline-block px-4 py-1 bg-indigo-50 text-indigo-600 rounded-full text-sm font-bold tracking-wide uppercase mb-4">
+                    Project Blueprint
+                </div>
+                <h1 class="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight text-slate-900">
+                    Lucky<span class="text-indigo-600">CRM</span>
+                </h1>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-500 mb-8">
+                    The Content Intelligence Engine
+                </h2>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                    Transforming complex lottery data into <strong>actionable stories</strong> for content creators. 
+                    We move from "Data 3 Days" to "1 Click 3 Seconds," empowering the team to hunt for "Lucky Newbies" and "Jackpot Legends" instantly.
+                </p>
+                <div class="mt-8">
+                    <button onclick="switchView('app')" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:bg-indigo-700 transition-colors shadow-lg hover:shadow-indigo-500/30 flex items-center gap-2 mx-auto">
+                        Launch Live App 🚀
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 2. Core Values Section -->
+        <section class="py-16 px-6 bg-slate-50">
+            <div class="max-w-6xl mx-auto">
+                <h3 class="text-3xl font-bold text-slate-800 mb-4 text-center">Core Values</h3>
+                <p class="text-center text-slate-500 mb-12 max-w-2xl mx-auto">
+                    Why we are building this platform. It's not just a dashboard; it's a storytelling machine.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Value 1 -->
+                    <div class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-indigo-500 hover:-translate-y-1 transition-transform duration-300">
+                        <div class="text-4xl mb-4">⚡</div>
+                        <h4 class="text-xl font-bold text-slate-900 mb-2">Speed to Content</h4>
+                        <p class="text-slate-600">
+                            Real-time access to winner lists. Content teams get actionable leads seconds after the lottery announcement.
+                        </p>
+                    </div>
+                    <!-- Value 2 -->
+                    <div class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-emerald-500 hover:-translate-y-1 transition-transform duration-300">
+                        <div class="text-4xl mb-4">🎭</div>
+                        <h4 class="text-xl font-bold text-slate-900 mb-2">Personalized Storytelling</h4>
+                        <p class="text-slate-600">
+                            AI transforms "Stats" into "Stories." We don't just see numbers; we see "The 5-Year Fighter" or "The First-Time Lucky."
+                        </p>
+                    </div>
+                    <!-- Value 3 -->
+                    <div class="bg-white p-8 rounded-2xl card-shadow border-t-4 border-amber-500 hover:-translate-y-1 transition-transform duration-300">
+                        <div class="text-4xl mb-4">🎯</div>
+                        <h4 class="text-xl font-bold text-slate-900 mb-2">Actionable Insight</h4>
+                        <p class="text-slate-600">
+                            Data ready for immediate action. Call, Interview, or Shoot Content right away. No more manual excel filtering.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Data Overview (The Source of Truth) -->
+        <section class="py-16 px-6 bg-white">
+            <div class="max-w-7xl mx-auto">
+                <div class="mb-12 text-center">
+                    <h3 class="text-3xl font-bold text-slate-800 mb-4">Mining the "High Luck" Segment</h3>
+                    <p class="text-slate-500 max-w-3xl mx-auto">
+                        Analysis of the <strong>"Golden Segment"</strong>: Customers who bought &le; 100 tickets but won > 15 rounds out of 25. 
+                        This anomaly indicates high engagement potential for viral content.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    
+                    <!-- Profile Card -->
+                    <div class="bg-slate-50 p-8 rounded-3xl border border-slate-200">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full uppercase">Target Persona</span>
+                                <h4 class="text-2xl font-bold text-slate-900 mt-2 thai-font">คุณคมสาร (Komsan)</h4>
+                                <p class="text-slate-500">Prov: Samut Prakan • Age: 54</p>
+                            </div>
+                            <div class="text-5xl">🧔🏻‍♂️</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white p-4 rounded-xl shadow-sm text-center">
+                                <div class="text-3xl font-bold text-indigo-600">16/25</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">Winning Rounds</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm text-center">
+                                <div class="text-3xl font-bold text-amber-500">~38</div>
+                                <div class="text-xs text-slate-400 font-bold uppercase">Tickets/Round</div>
+                            </div>
+                        </div>
+
+                        <p class="text-sm text-slate-600 italic border-l-4 border-indigo-400 pl-4">
+                            "A statistical anomaly. Despite buying a moderate amount, Komsan wins nearly 64% of the rounds he participates in. Ideal for a 'How does he do it?' interview."
+                        </p>
+                    </div>
+
+                    <!-- Visualization Column -->
+                    <div class="space-y-8">
+                        <!-- Chart 1: Prize Composition -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
+                            <h5 class="text-sm font-bold text-slate-400 uppercase tracking-wide mb-4 text-center">Prize Type Distribution (Komsan)</h5>
+                            <div class="chart-container">
+                                <canvas id="prizeChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart 2: Win Rate Comparison -->
+                        <div class="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
+                            <h5 class="text-sm font-bold text-slate-400 uppercase tracking-wide mb-4 text-center">Winning Frequency Comparison</h5>
+                            <div class="chart-container" style="height: 250px;">
+                                <canvas id="comparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. System Architecture -->
+        <section class="py-16 px-6 bg-slate-900 text-white">
+            <div class="max-w-6xl mx-auto">
+                <h3 class="text-3xl font-bold mb-12 text-center">System Integration Architecture</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center relative">
+                    
+                    <!-- Node 1 -->
+                    <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 relative z-10">
+                        <div class="text-5xl mb-4">🗄️</div>
+                        <h4 class="text-xl font-bold text-amber-400 mb-2">Data Layer</h4>
+                        <p class="text-slate-400 text-sm mb-4">Databricks (Gold Tables)</p>
+                        <ul class="text-left text-sm text-slate-300 space-y-2 bg-slate-900/50 p-4 rounded-lg">
+                            <li>• Cleaned Customer Data</li>
+                            <li>• Purchase History</li>
+                            <li>• Winning Logs</li>
+                        </ul>
+                    </div>
+
+                    <!-- Connector Mobile -->
+                    <div class="md:hidden arrow-down border-t-slate-600"></div>
+                    <!-- Connector Desktop -->
+                    <div class="hidden md:block absolute left-1/3 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-700 -z-0"></div>
+
+                    <!-- Node 2 -->
+                    <div class="bg-slate-800 p-8 rounded-2xl border border-indigo-500/50 shadow-[0_0_30px_rgba(79,70,229,0.15)] relative z-10">
+                        <div class="text-5xl mb-4">🧠</div>
+                        <h4 class="text-xl font-bold text-indigo-400 mb-2">Application Layer</h4>
+                        <p class="text-slate-400 text-sm mb-4">Python FastAPI + <span class="text-white font-bold">Gemini AI</span></p>
+                        <div class="text-left text-sm text-slate-300 bg-slate-900/50 p-4 rounded-lg">
+                            <p class="mb-2"><strong class="text-indigo-300">Input:</strong> JSON Data + Prompt</p>
+                            <p><strong class="text-emerald-300">Output:</strong> Marketing Scripts & Content Ideas</p>
+                        </div>
+                    </div>
+
+                    <!-- Connector Mobile -->
+                    <div class="md:hidden arrow-down border-t-slate-600"></div>
+
+                    <!-- Node 3 -->
+                    <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 relative z-10">
+                        <div class="text-5xl mb-4">💻</div>
+                        <h4 class="text-xl font-bold text-emerald-400 mb-2">Presentation Layer</h4>
+                        <p class="text-slate-400 text-sm mb-4">React Web App</p>
+                        <ul class="text-left text-sm text-slate-300 space-y-2 bg-slate-900/50 p-4 rounded-lg">
+                            <li>• User Interface</li>
+                            <li>• Filter & Search</li>
+                            <li>• "AI Insight" Button</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Use Cases -->
+        <section class="py-16 px-6 bg-slate-50">
+            <div class="max-w-6xl mx-auto">
+                <h3 class="text-3xl font-bold text-slate-800 mb-12 text-center">Content Creation Workflows</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    
+                    <!-- Use Case 1 -->
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100">
+                        <div class="bg-indigo-600 p-6 text-white">
+                            <h4 class="text-xl font-bold flex items-center gap-2">
+                                <span>🎥</span> The Lucky Newbie Hunter
+                            </h4>
+                            <p class="text-indigo-200 text-sm mt-1">Target: Viral TikTok Content</p>
+                        </div>
+                        <div class="p-8">
+                            <ol class="relative border-l border-slate-200 ml-3 space-y-8">
+                                <li class="ml-6">
+                                    <span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full -left-4 ring-4 ring-white text-indigo-600 font-bold text-sm">1</span>
+                                    <h5 class="font-bold text-slate-900">Set Filter</h5>
+                                    <p class="text-sm text-slate-500">Status: New User + Won Immediately + Location: BKK</p>
+                                </li>
+                                <li class="ml-6">
+                                    <span class="absolute flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full -left-4 ring-4 ring-white text-indigo-600 font-bold text-sm">2</span>
+                                    <h5 class="font-bold text-slate-900">Select User</h5>
+                                    <p class="text-sm text-slate-500">System finds "Khun Somchai" (Bought 1st time, won 2 digits).</p>
+                                </li>
+                                <li class="ml-6">
+                                    <span class="absolute flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full -left-4 ring-4 ring-white text-amber-600 font-bold text-sm">3</span>
+                                    <h5 class="font-bold text-slate-900">AI Action ✨</h5>
+                                    <div class="mt-2 bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm text-slate-600 thai-font">
+                                        <strong>Hook:</strong> "เชื่อไหมครับ? ซื้อใบแรกในชีวิต ก็รับโชคเลย!"<br>
+                                        <strong>CTA:</strong> "ใครอยากดวงดีแบบนี้ กดลิงก์หน้าโปรไฟล์เลย"
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Use Case 2 -->
+                    <div class="bg-white rounded-3xl overflow-hidden shadow-lg border border-slate-100">
+                        <div class="bg-emerald-600 p-6 text-white">
+                            <h4 class="text-xl font-bold flex items-center gap-2">
+                                <span>🏆</span> The Jackpot Story
+                            </h4>
+                            <p class="text-emerald-200 text-sm mt-1">Target: Emotional/Inspirational Content</p>
+                        </div>
+                        <div class="p-8">
+                            <ol class="relative border-l border-slate-200 ml-3 space-y-8">
+                                <li class="ml-6">
+                                    <span class="absolute flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full -left-4 ring-4 ring-white text-emerald-600 font-bold text-sm">1</span>
+                                    <h5 class="font-bold text-slate-900">Direct Search</h5>
+                                    <p class="text-sm text-slate-500">Input Winner ID to retrieve full profile.</p>
+                                </li>
+                                <li class="ml-6">
+                                    <span class="absolute flex items-center justify-center w-8 h-8 bg-emerald-100 rounded-full -left-4 ring-4 ring-white text-emerald-600 font-bold text-sm">2</span>
+                                    <h5 class="font-bold text-slate-900">Profile Reveal</h5>
+                                    <p class="text-sm text-slate-500">Data shows: "Bought for 5 years, same number every round."</p>
+                                </li>
+                                <li class="ml-6">
+                                    <span class="absolute flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full -left-4 ring-4 ring-white text-amber-600 font-bold text-sm">3</span>
+                                    <h5 class="font-bold text-slate-900">AI Action ✨</h5>
+                                    <div class="mt-2 bg-slate-50 p-4 rounded-lg border border-slate-200 text-sm text-slate-600 thai-font">
+                                        <strong>Theme:</strong> "ความพยายามที่ไม่สูญเปล่า ของนักสู้ชีวิต"<br>
+                                        <strong>Mood:</strong> Inspirational, Heartwarming.
+                                    </div>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. Project Timeline -->
+        <section class="py-16 px-6 bg-white">
+            <div class="max-w-4xl mx-auto">
+                <h3 class="text-3xl font-bold text-slate-800 mb-12 text-center">Execution Roadmap</h3>
+                
+                <div class="space-y-8">
+                    <!-- Phase 1 -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="md:w-32 flex-shrink-0">
+                            <span class="font-bold text-slate-400 uppercase tracking-widest text-sm">Week 1-2</span>
+                        </div>
+                        <div class="flex-1 pb-8 border-b border-slate-100">
+                            <h4 class="text-xl font-bold text-slate-900 mb-2">Phase 1: Foundation</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>Backend Connection to Databricks Gold Table</li>
+                                <li>Database Schema Definition</li>
+                                <li>Security & Auth Setup</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Phase 2 -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="md:w-32 flex-shrink-0">
+                            <span class="font-bold text-indigo-500 uppercase tracking-widest text-sm">Week 3-4</span>
+                        </div>
+                        <div class="flex-1 pb-8 border-b border-slate-100">
+                            <h4 class="text-xl font-bold text-indigo-600 mb-2">Phase 2: Core Development</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>Frontend UI (React) Development</li>
+                                <li>Full System Integration</li>
+                                <li><strong>Gemini API Connection & Prompt Tuning</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Phase 3 -->
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="md:w-32 flex-shrink-0">
+                            <span class="font-bold text-slate-400 uppercase tracking-widest text-sm">Week 5</span>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="text-xl font-bold text-slate-900 mb-2">Phase 3: UAT & Launch</h4>
+                            <ul class="list-disc list-inside text-slate-600 space-y-1">
+                                <li>Content Team User Testing (10 Users)</li>
+                                <li>Refine AI Prompts based on feedback</li>
+                                <li><strong>GO LIVE</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+            <p class="font-bold text-slate-200 text-lg mb-2">LuckyCRM Project</p>
+            <p class="text-sm">Powered by Databricks, Python, React & Google Gemini</p>
+        </footer>
+    </div>
+
+    <!-- ================= PAGE 2: LIVE APP (REACT ROOT) ================= -->
+    <div id="root" style="display: none;"></div>
+
+    <!-- SCRIPT: View Switcher Logic -->
+    <script>
+        function switchView(view) {
+            const infogDiv = document.getElementById('infographic-view');
+            const rootDiv = document.getElementById('root');
+            const btnBlueprint = document.getElementById('btn-blueprint');
+            const btnApp = document.getElementById('btn-app');
+
+            if (view === 'blueprint') {
+                infogDiv.style.display = 'block';
+                rootDiv.style.display = 'none';
+                btnBlueprint.classList.add('active');
+                btnBlueprint.classList.remove('inactive');
+                btnApp.classList.add('inactive');
+                btnApp.classList.remove('active');
+            } else {
+                infogDiv.style.display = 'none';
+                rootDiv.style.display = 'block';
+                btnBlueprint.classList.remove('active');
+                btnBlueprint.classList.add('inactive');
+                btnApp.classList.remove('inactive');
+                btnApp.classList.add('active');
+            }
+        }
+    </script>
+
+    <!-- SCRIPT: Chart Logic (Infographic) -->
+    <script>
+        function wrapLabels(labels, maxChars) {
+            return labels.map(label => {
+                if (label.length <= maxChars) return label;
+                const words = label.split(' ');
+                const lines = [];
+                let currentLine = words[0];
+
+                for (let i = 1; i < words.length; i++) {
+                    if ((currentLine + " " + words[i]).length <= maxChars) {
+                        currentLine += " " + words[i];
+                    } else {
+                        lines.push(currentLine);
+                        currentLine = words[i];
+                    }
+                }
+                lines.push(currentLine);
+                return lines;
+            });
+        }
+
+        const ctxPrize = document.getElementById('prizeChart').getContext('2d');
+        const rawPrizeLabels = ['Last 2 Digits', 'Last 3 Digits', 'Front 3 Digits', 'Other Prizes'];
+        const prizeChart = new Chart(ctxPrize, {
+            type: 'doughnut',
+            data: {
+                labels: wrapLabels(rawPrizeLabels, 16),
+                datasets: [{
+                    data: [65, 20, 10, 5], 
+                    backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#cbd5e1'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: "'Outfit', sans-serif" }, boxWidth: 12 } },
+                    tooltip: { callbacks: { title: function(tooltipItems) { const item = tooltipItems[0]; let label = item.chart.data.labels[item.dataIndex]; if (Array.isArray(label)) return label.join(' '); return label; } } }
+                }
+            }
+        });
+
+        const ctxComp = document.getElementById('comparisonChart').getContext('2d');
+        const rawCompLabels = ['Average User', 'Target Segment (High Luck)'];
+        const compChart = new Chart(ctxComp, {
+            type: 'bar',
+            data: {
+                labels: wrapLabels(rawCompLabels, 16),
+                datasets: [{
+                    label: 'Win Rate (%)',
+                    data: [12, 64],
+                    backgroundColor: ['#cbd5e1', '#10b981'],
+                    borderRadius: 8,
+                    barThickness: 40
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 100, grid: { display: false } }, x: { grid: { display: false } } },
+                plugins: { legend: { display: false }, tooltip: { callbacks: { title: function(tooltipItems) { const item = tooltipItems[0]; let label = item.chart.data.labels[item.dataIndex]; if (Array.isArray(label)) return label.join(' '); return label; } } } }
+            }
+        });
+    </script>
+
+    <!-- SCRIPT: React App (Page 2) -->
     <script type="text/babel">
         const { useState, useEffect } = React;
 
