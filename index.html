@@ -240,7 +240,7 @@
                     <div class="bg-slate-800 p-8 rounded-2xl border border-indigo-500/50 shadow-[0_0_30px_rgba(79,70,229,0.15)] relative z-10">
                         <div class="text-5xl mb-4">⚡</div>
                         <h4 class="text-xl font-bold text-indigo-400 mb-2">FastAPI</h4>
-                        <p class="text-slate-400 text-sm mb-4">on Render</p>
+                        <p class="text-slate-400 text-sm mb-4">on Google Cloud Run</p>
                         <div class="text-left text-sm text-slate-300 bg-slate-900/50 p-4 rounded-lg">
                             <p class="mb-2"><strong class="text-indigo-300">Input:</strong> JSON Data + Prompt</p>
                             <p><strong class="text-emerald-300">Output:</strong> Marketing Scripts</p>
@@ -335,62 +335,10 @@
             </div>
         </section>
 
-        <!-- 6. Project Timeline -->
-        <section class="py-16 px-6 bg-white">
-            <div class="max-w-4xl mx-auto">
-                <h3 class="text-3xl font-bold text-slate-800 mb-12 text-center">Execution Roadmap</h3>
-                
-                <div class="space-y-8">
-                    <!-- Phase 1 -->
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="md:w-32 flex-shrink-0">
-                            <span class="font-bold text-slate-400 uppercase tracking-widest text-sm">Week 1-2</span>
-                        </div>
-                        <div class="flex-1 pb-8 border-b border-slate-100">
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Phase 1: Foundation</h4>
-                            <ul class="list-disc list-inside text-slate-600 space-y-1">
-                                <li>Backend Connection to Databricks Gold Table</li>
-                                <li>Database Schema Definition</li>
-                                <li>Security & Auth Setup</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- Phase 2 -->
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="md:w-32 flex-shrink-0">
-                            <span class="font-bold text-indigo-500 uppercase tracking-widest text-sm">Week 3-4</span>
-                        </div>
-                        <div class="flex-1 pb-8 border-b border-slate-100">
-                            <h4 class="text-xl font-bold text-indigo-600 mb-2">Phase 2: Core Development</h4>
-                            <ul class="list-disc list-inside text-slate-600 space-y-1">
-                                <li>Frontend UI (React) Development</li>
-                                <li>Full System Integration</li>
-                                <li><strong>Gemini API Connection & Prompt Tuning</strong></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <!-- Phase 3 -->
-                    <div class="flex flex-col md:flex-row gap-4">
-                        <div class="md:w-32 flex-shrink-0">
-                            <span class="font-bold text-slate-400 uppercase tracking-widest text-sm">Week 5</span>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Phase 3: UAT & Launch</h4>
-                            <ul class="list-disc list-inside text-slate-600 space-y-1">
-                                <li>Content Team User Testing (10 Users)</li>
-                                <li>Refine AI Prompts based on feedback</li>
-                                <li><strong>GO LIVE</strong></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
         <!-- Footer -->
         <footer class="bg-slate-900 text-slate-400 py-12 text-center border-t border-slate-800">
             <p class="font-bold text-slate-200 text-lg mb-2">LuckyCRM Project</p>
-            <p class="text-sm">Powered by Databricks, Python FastAPI, React & Google Gemini</p>
+            <p class="text-sm">Powered by Databricks, Python FastAPI, React & Google Cloud Run</p>
         </footer>
     </div>
 
@@ -419,6 +367,11 @@
                 btnBlueprint.classList.add('inactive');
                 btnApp.classList.remove('inactive');
                 btnApp.classList.add('active');
+                
+                // Trigger resize so ChartJS knows the container size changed
+                setTimeout(() => {
+                    window.dispatchEvent(new Event('resize'));
+                }, 100);
             }
         }
     </script>
@@ -716,12 +669,12 @@
             const [notification, setNotification] = useState(null);
             const [dataSource, setDataSource] = useState('mock'); 
             
-            // SMART DEFAULT URL: Prioritizes Render URL unless specifically changed by user
-            const defaultUrl = 'https://luckycrmbackend.onrender.com/api/customers';
+            // SMART DEFAULT URL: Updated to your new Cloud Run URL (Asia Southeast) - Final
+            const defaultUrl = 'https://my-api-service-61827023210.asia-southeast1.run.app/api/customers';
             const [apiEndpoint, setApiEndpoint] = useState(() => {
                 const saved = localStorage.getItem('api_endpoint');
-                // If saved is localhost (old default), override it with new Render default
-                if (saved && saved.includes('localhost')) return defaultUrl;
+                // Always force default if saved is old render/localhost/other region/wrong endpoint to prevent confusion
+                if (saved && (saved.includes('localhost') || saved.includes('onrender') || !saved.includes('api/customers'))) return defaultUrl;
                 return saved || defaultUrl;
             });
 
@@ -740,30 +693,54 @@
             const fetchData = async () => {
                 setIsLoading(true);
                 if (dataSource === 'live') {
-                    // Auto-fix URL if missing endpoint path
+                    // Use the endpoint exactly as defined/saved
                     let targetUrl = apiEndpoint;
-                    if (!targetUrl.includes('/api/customers')) {
-                        // Strip trailing slash if exists then append path
-                        targetUrl = targetUrl.replace(/\/$/, '') + '/api/customers';
-                    }
-
+                    
                     // Extract domain for friendly notification
                     let domain = "API";
                     try {
                         const urlObj = new URL(targetUrl);
                         domain = urlObj.hostname;
+                        if (domain.includes('run.app')) domain = "Google Cloud Run";
                     } catch (e) {}
                     
                     setNotification(`Connecting to ${domain}...`);
                     try {
                         const res = await fetch(targetUrl);
                         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
+                        
                         const rawData = await res.json();
-                        setData(normalizeData(rawData));
+                        
+                        // INTELLIGENT PARSING: Handle if FastAPI wraps data in {"data": [...]}
+                        let finalData = rawData;
+                        if (rawData && rawData.data) {
+                            finalData = rawData.data;
+                            // Check if it's a stringified JSON (sometimes happens with Python str())
+                            if (typeof finalData === 'string') {
+                                try {
+                                    // Try to replace Python tuples () to JS arrays [] just in case, though ideally backend sends JSON
+                                    // This is a safety catch.
+                                    let fixedStr = finalData.replace(/\(/g, '[').replace(/\)/g, ']').replace(/'/g, '"').replace(/None/g, 'null');
+                                    finalData = JSON.parse(fixedStr);
+                                } catch (e) {
+                                    // If parsing fails, use fallback or empty
+                                    console.warn("Failed to parse stringified data", e);
+                                }
+                            }
+                        }
+
+                        setData(normalizeData(finalData));
                         setNotification("Connected to Live Backend Successfully!");
                     } catch (err) {
                         console.warn("Backend Error:", err);
-                        setNotification(`Connection Failed: ${err.message}. Reverting to Mock.`);
+                        
+                        // --- IMPROVED ERROR HANDLING FOR USER ---
+                        let errorMsg = err.message;
+                        if (errorMsg.includes("Failed to fetch")) {
+                            errorMsg = "CORS Error (Blocked by Cloud Run). You must update python code.";
+                        }
+                        
+                        setNotification(`Connection Failed: ${errorMsg}. Reverting to Mock.`);
                         setDataSource('mock'); 
                         setData(MOCK_DATA); 
                     }
@@ -773,7 +750,7 @@
                     setData(MOCK_DATA);
                 }
                 setIsLoading(false);
-                setTimeout(() => setNotification(null), 4000);
+                setTimeout(() => setNotification(null), 5000);
             };
 
             useEffect(() => { fetchData(); }, [dataSource, apiEndpoint]);
@@ -897,7 +874,7 @@
 
             // ADDED: Reset settings function
             const handleResetSettings = () => {
-                const defaultUrl = 'https://luckycrmbackend.onrender.com/api/customers';
+                const defaultUrl = 'https://my-api-service-61827023210.asia-southeast1.run.app/api/customers';
                 setApiEndpoint(defaultUrl);
                 localStorage.setItem('api_endpoint', defaultUrl);
                 
@@ -905,7 +882,7 @@
                 const inputUrl = document.getElementById('apiUrlInput');
                 if(inputUrl) inputUrl.value = defaultUrl;
                 
-                setNotification("Restored Default Settings");
+                setNotification("Restored Cloud Run URL Default");
             };
 
             const fmtNumber = (num) => new Intl.NumberFormat('th-TH').format(num);
@@ -1121,8 +1098,8 @@
 
                                     <div>
                                         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Backend API URL</label>
-                                        <input type="text" placeholder="https://your-api.onrender.com/api/customers" className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none font-mono text-sm" defaultValue={apiEndpoint} id="apiUrlInput" />
-                                        <p className="text-[10px] text-slate-400 mt-1">Default: https://luckycrmbackend.onrender.com/api/customers</p>
+                                        <input type="text" placeholder="https://your-api.run.app/data" className="w-full border border-slate-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none font-mono text-sm" defaultValue={apiEndpoint} id="apiUrlInput" />
+                                        <p className="text-[10px] text-slate-400 mt-1">Default: https://my-api-service...run.app/data</p>
                                     </div>
                                 </div>
 
